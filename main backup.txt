@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lirik dengan Efek Fade-In dan Slide-Up</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Background image and other styles */
+        body {
+            font-family: Arial, sans-serif;
+            color: white;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-image: url('https://i.pinimg.com/736x/66/d9/80/66d9805c852a18123896781737b097d7.jpg');
+            background-size: cover;
+            background-position: top center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            position: relative;
+            margin: 20px;
+            height: 50%; /* Set the height of the lyrics container */
+            width: 80%;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lyrics-container {
+            position: absolute;
+            top: 80%; /* Adjust this to control the starting position of lyrics */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            text-align: center;
+        }
+
+        .lyrics {
+            white-space: pre-wrap;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .fade-slide {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeSlideIn 2s forwards, fadeSlideOut 2s forwards 4s;
+            margin-bottom: 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 80px; /* Add more margin to push the text and image further down */
+        }
+
+        @keyframes fadeSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeSlideOut {
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        .image {
+            width: 100px; /* Adjust size of image */
+            height: 100px;
+            margin-bottom: 10px; /* Space between image and text */
+        }
+
+        .left, .right {
+            text-align: center;
+            margin-left: 0px;
+            margin-right: 0px;
+        }
+
+        .audio-container {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Audio element for background music -->
+    <audio id="bgm" autoplay loop>
+        <source src="audio.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="container">
+        <div class="lyrics-container">
+            <div class="lyrics" id="lyrics">
+                <!-- Lyrics will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadLyrics() {
+            try {
+                const response = await fetch('lyrics.json'); // Fetch the JSON file
+                const data = await response.json();
+                return data.lyrics;
+            } catch (error) {
+                console.error('Error loading lyrics:', error);
+                return [];
+            }
+        }
+
+        async function displayLyrics() {
+            const lyrics = await loadLyrics();
+            let index = 0;
+            const lyricsElement = document.getElementById("lyrics");
+
+            // Array of images (URL or file path)
+            const images = [
+                'https://via.placeholder.com/100x100?text=Image+1',
+                'https://via.placeholder.com/100x100?text=Image+2',
+                'https://via.placeholder.com/100x100?text=Image+3',
+                'https://via.placeholder.com/100x100?text=Image+4',
+                // Add more images as necessary
+            ];
+
+            function showNextLyric() {
+                if (index < lyrics.length) {
+                    const lyricDiv = document.createElement('div');
+                    lyricDiv.classList.add('fade-slide');
+
+                    // Check if it's a blank line (to separate pairs)
+                    if (lyrics[index][0] === "" && lyrics[index][1] === "") {
+                        index++;
+                        showNextLyric();
+                        return;
+                    }
+
+                    // Add the lyric line
+                    const firstLine = lyrics[index][0];
+                    const secondLine = lyrics[index][1] || '';
+
+                    // Create a div for the text
+                    const pairDiv = document.createElement('div');
+                    pairDiv.innerHTML = `<span>${firstLine}</span><br><span>${secondLine}</span>`;
+
+                    // Create an image for the lyric
+                    const imageDiv = document.createElement('img');
+                    imageDiv.src = images[index % images.length];  // Cycle through images
+                    imageDiv.classList.add('image');
+
+                    // Append image and lyric pair
+                    lyricDiv.appendChild(imageDiv);
+                    lyricDiv.appendChild(pairDiv);
+                    lyricsElement.appendChild(lyricDiv);
+                    index++;
+
+                    // After fade-out, show next lyric
+                    setTimeout(() => {
+                        showNextLyric();
+                    }, 6000); // Delay before showing next lyric (adjust timing)
+                }
+            }
+
+            // Start showing the first lyric
+            showNextLyric();
+        }
+
+        // Start displaying lyrics after the page has loaded
+        window.onload = displayLyrics;
+    </script>
+
+    <!-- Bootstrap 5 JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
